@@ -1,0 +1,15 @@
+document.getElementById('form').onsubmit = function(){
+ var contents = document.getElementById('form').contents.value;
+    
+ chrome.runtime.sendMessage({"type":"save"},function (response){
+     save_dict = {[response]:contents}
+     chrome.storage.local.set(save_dict, function(){
+         console.log(response)
+         console.log(contents)
+         chrome.storage.local.get(null, ((data) => {console.log(data)}));
+     })
+
+
+ })
+ return false;
+}
