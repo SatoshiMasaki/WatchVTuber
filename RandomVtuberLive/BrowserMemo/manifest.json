@@ -1,0 +1,17 @@
+{
+  "name": "ブラウザ用メモ帳",
+  "version": "0.1.1",
+  "manifest_version": 2,
+  "description": "URL別のメモを管理する",
+  "icons": {"16": "icon16.png"},
+
+  "browser_action":{
+    "default_popup": "popup.html"
+  }
+  ,
+  // chrome APIの利用
+  "permissions": [
+    "storage",
+    "activeTab"
+  ]
+}
