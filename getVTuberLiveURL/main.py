@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
@@ -8,24 +7,6 @@ import re
 import random
 import webbrowser
 
-"""
-minicalendar_viewer
->list1 スケジュール表
->full_hr 区切り
-
-<li>00時00分～
-    <img src="https:" alt="face.png" title="face.png" width="25" height="25" loading="lazy">
-    <a class="ext" href="https://twitter.com/" rel="nofollow">笹木咲
-    <img src="https://cdn.wikiwiki.jp/to/w/common/image/plus/ext.png?v=4" alt="" title="" class="ext 
-    pukiwiki-open-uri" data-href="https://twitter.com/saku_sasaki/status/1383435601165254662" data-frame="_blank">
-    </a> at:YouTube ポケモンピンボール
-</li>
-
-
-selenium.common.exceptions.InvalidSelectorException: Message: invalid selector: Unable to locate an element with the xpath expression //div[@class='holodule navbar-text' and contains(text(), 4/20)] because of the following error:
-SyntaxError: Failed to execute 'evaluate' on 'Document': The string '//div[@class='holodule navbar-text' and contains(text(), 4/20)]' is not a valid XPath expression.
-  (Session info: headless chrome=89.0.4389.128)
-"""
 
 driver_pass = "chromedriver.exe"
 nijisanji_url = "https://nijisanji.net/lives/"
@@ -38,18 +19,6 @@ pattern_border_another = re.compile(".*border: 3px solid red.*")
 
 
 def getHoloSchedule():
-    """
-    div.holodule
-    >div.holodule navbar-text
-
-                                04/19
-                                (月)
-
-    親の親の兄弟要素が予定表
-
-    予定枠のaタグにboaderが指定されていれば配信中？
-    """
-
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     now = datetime.datetime.now()
@@ -98,13 +67,8 @@ def getHoloSchedule():
 
 
 def getNijiSchedule():
-    """
-    ライブ中マーク：ui mini horizontal label pink
-    ライブ中マーク：ui mini horizontal label olive
-    """
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    now_hour = datetime.datetime.now().hour
     now_on_live_flag = False
 
     driver = webdriver.Chrome(executable_path="chromedriver.exe", options=chrome_options)
@@ -116,6 +80,7 @@ def getNijiSchedule():
         now_on_live_flag = True
     except NoSuchElementException:
         print("現在配信中のライバーはいません。")
+        time.sleep(10)
 
     if now_on_live_flag:
         items = driver.find_elements_by_xpath(
@@ -128,4 +93,5 @@ def getNijiSchedule():
 
 
 if __name__ == '__main__':
-    getNijiSchedule()
+    container = [getNijiSchedule, getHoloSchedule]
+    container[random.randint(0, 1)]()
