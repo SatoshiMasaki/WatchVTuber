@@ -28,7 +28,7 @@ SyntaxError: Failed to execute 'evaluate' on 'Document': The string '//div[@clas
 """
 
 driver_pass = "chromedriver.exe"
-nijisanji_url = "https://wikiwiki.jp/nijisanji/%E9%85%8D%E4%BF%A1%E4%BA%88%E5%AE%9A%E3%83%AA%E3%82%B9%E3%83%88"
+nijisanji_url = "https://nijisanji.net/lives/"
 hololive_url = "https://schedule.hololive.tv/"
 pattern_midnight = re.compile(".*0[0-5]時[0-9]{2}分～.*")
 pattern_noon = re.compile(".*(0[6-9])*(1[0-7])*時[0-9]{2}分～ .*")
@@ -49,12 +49,6 @@ def getHoloSchedule():
 
     予定枠のaタグにboaderが指定されていれば配信中？
     """
-    def check_exist_by_xpath(xpath):
-        try:
-            driver.find_element_by_xpath(xpath)
-        except NoSuchElementException:
-            return False
-        return True
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -103,38 +97,35 @@ def getHoloSchedule():
         webbrowser.open(target_live[random.randint(0, len(target_live) - 1)])
 
 
-def main():
+def getNijiSchedule():
+    """
+    ライブ中マーク：ui mini horizontal label pink
+    ライブ中マーク：ui mini horizontal label olive
+    """
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     now_hour = datetime.datetime.now().hour
-    schedule_data = None
+    now_on_live_flag = False
 
     driver = webdriver.Chrome(executable_path="chromedriver.exe", options=chrome_options)
     driver.get(nijisanji_url)
     time.sleep(5)
 
-    html = driver.page_source.encode('utf-8')
-    page_data = BeautifulSoup(html, "html.parser")
+    try:
+        driver.find_element_by_xpath("//span[@class='ui mini horizontal label pink']")
+        now_on_live_flag = True
+    except NoSuchElementException:
+        print("現在配信中のライバーはいません。")
 
-    calender = page_data.find(class_="minicalendar_viewer")
-    mini_tables = calender.find_all(class_="list1")
+    if now_on_live_flag:
+        items = driver.find_elements_by_xpath(
+            "//span[@class='ui mini horizontal label pink']/parent::a"
+        )
 
-    for table in mini_tables:
-        if now_hour < 6:
-            if pattern_midnight.match(str(table.find("li"))):
-                schedule_data = table.find_all("li")
-        elif now_hour < 18:
-            if pattern_midnight.match(str(table.find("li"))):
-                schedule_data = table.find_all("li")
-        else:
-            if pattern_midnight.match(str(table.find("li"))):
-                schedule_data = table.find_all("li")
-
-    container = []
-    for data, i in enumerate(schedule_data):
-        if int(data.text[0:2]) == now_hour:
-            container.append(i)
+        webbrowser.open(
+            items[random.randint(0, len(items)) - 1].get_attribute("href")
+        )
 
 
 if __name__ == '__main__':
-    getHoloSchedule()
+    getNijiSchedule()
